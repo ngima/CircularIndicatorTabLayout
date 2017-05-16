@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="size_indicator">6dp</dimen>
+    <dimen name="indicator_radius">6dp</dimen>
+    <dimen name="spacing">1dp</dimen>
+</resources>

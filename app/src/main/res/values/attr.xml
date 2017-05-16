@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SlidingTabLayout">
+        <attr name="dividerColor" format="color|reference" />
+        <attr name="indicatorColor" format="color|reference" />
+        <attr name="lineColor" format="color|reference" />
+        <attr name="tabViewTextViewColor" format="color|reference" />
+        <attr name="tabViewTextViewSelectedColor" format="color|reference" />
+
+        <attr name="tabViewLayoutId" format="reference" />
+        <attr name="tabViewTextViewId" format="reference" />
+
+        <attr name="indicatorRadius" format="dimension" />
+        <attr name="tabMinWidth" format="dimension" />
+        <attr name="contentInsetStart" format="dimension" />
+
+        <attr name="tabPadding" format="dimension" />
+        <attr name="tabPaddingStart" format="dimension" />
+        <attr name="tabPaddingTop" format="dimension" />
+        <attr name="tabPaddingEnd" format="dimension" />
+        <attr name="tabPaddingBottom" format="dimension" />
+
+        <attr name="mode" format="enum">
+            <enum name="fixed" value="1" />
+            <enum name="scrollable" value="0" />
+        </attr>
+        <attr name="tab_gravity" format="enum">
+            <enum name="center" value="1" />
+            <enum name="fill" value="0" />
+        </attr>
+        <attr name="lineEnabled" format="boolean" />
+        <attr name="position" format="enum">
+            <enum name="top" value="0" />
+            <enum name="bottom" value="1" />
+        </attr>
+    </declare-styleable>
+</resources>
+
