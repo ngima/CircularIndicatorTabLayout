@@ -1,27 +1,42 @@
-package np.com.ngimasherpa.circularindicatortablayout;
+package np.com.ngimasherpa.citablayout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.IntDef;
 import android.support.annotation.RestrictTo;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.HorizontalScrollView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import static android.support.design.widget.TabLayout.GRAVITY_FILL;
+import static android.support.v4.view.ViewPager.SCROLL_STATE_DRAGGING;
+import static android.support.v4.view.ViewPager.SCROLL_STATE_SETTLING;
 
 /**
  * To be used with ViewPager to provide a tab indicator component which give constant feedback as to
@@ -39,7 +54,7 @@ import static android.support.design.widget.TabLayout.GRAVITY_FILL;
  * The views used as tabs can be customized by calling {@link #setCustomTabView(int, int)},
  * providing the layout ID of your custom layout.
  */
-public class SlidingTabLayout extends HorizontalScrollView {
+public class CircularIndicatorTabLayout extends HorizontalScrollView {
 
 
     /**
@@ -72,6 +87,16 @@ public class SlidingTabLayout extends HorizontalScrollView {
          * @return return the color of the line color.
          */
         int getLineColor();
+
+        /**
+         * @return return the color of the icon that are not selected.
+         */
+        int getIconColor(int position);
+
+        /**
+         * @return return the color of the selected icon.
+         */
+        int getSelectedIconColor(int position);
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -112,26 +137,36 @@ public class SlidingTabLayout extends HorizontalScrollView {
     private int mTabGravity;
     private int mTabViewLayoutId;
     private int mTabViewTextViewId;
+    private int mTabViewIconId;
     private int mRequestedTabMinWidth;
     private int mScrollableTabMinWidth;
+    private int mCurrentPosition = 0;
 
+
+    int mPosition;
     private int mMode;
     private Context mContext;
     private ViewPager mViewPager;
 
+    private int mSelectedTabTextColor;
+    private int mTabTextColor;
+    private int mIconColor;
+    private int mSelectedIconColor;
+
+    private SimpleIconManager mIconManager;
     private ViewPager.OnPageChangeListener mViewPagerPageChangeListener;
 
-    public SlidingTabLayout(Context context) {
+    public CircularIndicatorTabLayout(Context context) {
         this(context, null);
         initialize(context, null);
     }
 
-    public SlidingTabLayout(Context context, AttributeSet attrs) {
+    public CircularIndicatorTabLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
         initialize(context, attrs);
     }
 
-    public SlidingTabLayout(Context context, AttributeSet attrs, int defStyle) {
+    public CircularIndicatorTabLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mTabStrip = new SlidingTabStrip(context, attrs);
         // Disable the Scroll Bar
@@ -146,38 +181,107 @@ public class SlidingTabLayout extends HorizontalScrollView {
         applyModeAndGravity();
     }
 
+//    @Override
+//    protected void onDraw(Canvas canvas) {
+//        super.onDraw(canvas);
+//    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        if (bitmap == null) {
+            createWindowFrame();
+        }
+        super.dispatchDraw(canvas);
+        canvas.drawBitmap(bitmap, 0, 0, null);
+    }
+
+    Bitmap bitmap;
+
+    private void drawTransparentBackground(Canvas canvas) {
+        bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+        final float roundPx = getHeight() / 2;
+
+        paint.setAntiAlias(true);
+//        paint.setAlpha(99);
+//        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(Color.TRANSPARENT);
+//        canvas.drawRoundRect(rectF, roundPx, roundPx, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+//        canvas.drawBitmap(bitmap, rect, rect, paint);
+        canvas.drawRect(rectF, paint);
+    }
+
+    protected void createWindowFrame() {
+        bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas osCanvas = new Canvas(bitmap);
+
+        RectF outerRectangle = new RectF(0, 0, getWidth(), getHeight());
+
+        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.TRANSPARENT);
+        paint.setAlpha(0);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OUT));
+        osCanvas.drawRect(outerRectangle, paint);
+    }
+
+    @Override
+    public boolean isInEditMode() {
+        return true;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        bitmap = null;
+    }
+
     private void initialize(Context context, AttributeSet attributeSet) {
         mContext = context;
 
         TypedArray a = mContext.obtainStyledAttributes(attributeSet,
-                R.styleable.SlidingTabLayout,
+                R.styleable.CircularIndicatorTabLayout,
                 0, 0);
 
-        mTabViewLayoutId = a.getResourceId(R.styleable.SlidingTabLayout_tabViewLayoutId, 0);
-        mTabViewTextViewId = a.getResourceId(R.styleable.SlidingTabLayout_tabViewTextViewId,
+        mTabViewLayoutId = a.getResourceId(R.styleable.CircularIndicatorTabLayout_tabViewLayoutId, 0);
+        mTabViewTextViewId = a.getResourceId(R.styleable.CircularIndicatorTabLayout_tabViewTextViewId,
                 0);
+        mTabViewIconId = a.getResourceId(R.styleable.CircularIndicatorTabLayout_tabViewIconId, 0);
 
-        mContentInsetStart = a.getDimensionPixelSize(R.styleable.SlidingTabLayout_contentInsetStart,
+        mContentInsetStart = a.getDimensionPixelSize(R.styleable.CircularIndicatorTabLayout_contentInsetStart,
                 INVALID_WIDTH);
 
         mTabPaddingStart = mTabPaddingTop = mTabPaddingEnd = mTabPaddingBottom = a
-                .getDimensionPixelSize(R.styleable.SlidingTabLayout_tabPadding, 0);
-        mTabPaddingStart = a.getDimensionPixelSize(R.styleable.SlidingTabLayout_tabPaddingStart,
+                .getDimensionPixelSize(R.styleable.CircularIndicatorTabLayout_tabPadding, 0);
+        mTabPaddingStart = a.getDimensionPixelSize(R.styleable.CircularIndicatorTabLayout_tabPaddingStart,
                 mTabPaddingStart);
-        mTabPaddingTop = a.getDimensionPixelSize(R.styleable.SlidingTabLayout_tabPaddingTop,
+        mTabPaddingTop = a.getDimensionPixelSize(R.styleable.CircularIndicatorTabLayout_tabPaddingTop,
                 mTabPaddingTop);
-        mTabPaddingEnd = a.getDimensionPixelSize(R.styleable.SlidingTabLayout_tabPaddingEnd,
+        mTabPaddingEnd = a.getDimensionPixelSize(R.styleable.CircularIndicatorTabLayout_tabPaddingEnd,
                 mTabPaddingEnd);
-        mTabPaddingBottom = a.getDimensionPixelSize(R.styleable.SlidingTabLayout_tabPaddingBottom,
+        mTabPaddingBottom = a.getDimensionPixelSize(R.styleable.CircularIndicatorTabLayout_tabPaddingBottom,
                 mTabPaddingBottom);
 
-        mTabGravity = a.getInt(R.styleable.SlidingTabLayout_tab_gravity, GRAVITY_CENTER);
+        mSelectedTabTextColor = a.getColor(R.styleable.CircularIndicatorTabLayout_tabViewTextViewSelectedColor,
+                Utils.getAccentColor(getContext()));
+        mTabTextColor = a.getColor(R.styleable.CircularIndicatorTabLayout_tabViewTextViewColor,
+                Utils.getAccentColor(getContext()));
+        mIconColor = a.getColor(R.styleable.CircularIndicatorTabLayout_iconColor,
+                Utils.getAccentColor(getContext()));
+        mSelectedIconColor = a.getColor(R.styleable.CircularIndicatorTabLayout_selectedIconColor,
+                Utils.getAccentColor(getContext()));
 
-        mRequestedTabMinWidth = a.getDimensionPixelSize(R.styleable.SlidingTabLayout_tabMinWidth,
+        mTabGravity = a.getInt(R.styleable.CircularIndicatorTabLayout_tab_gravity, GRAVITY_CENTER);
+
+        mRequestedTabMinWidth = a.getDimensionPixelSize(R.styleable.CircularIndicatorTabLayout_tabMinWidth,
                 INVALID_WIDTH);
 //        mMode = a.getInt(R.styleable.SlidingTabLayout_tabMode, MODE_FIXED);
 //        mMode = MODE_FIXED; //default
-        mMode = a.getInt(R.styleable.SlidingTabLayout_mode, MODE_FIXED);
+        mMode = a.getInt(R.styleable.CircularIndicatorTabLayout_mode, MODE_FIXED);
+        mPosition = a.getInt(R.styleable.CircularIndicatorTabLayout_indicatorPosition, POSITION_TOP);
         mScrollableTabMinWidth = getResources().getDimensionPixelSize(
                 android.support.design.R.dimen.design_tab_scrollable_min_width);
     }
@@ -210,7 +314,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
     }
 
     /**
-     * Set the {@link ViewPager.OnPageChangeListener}. When using {@link SlidingTabLayout} you are
+     * Set the {@link ViewPager.OnPageChangeListener}. When using {@link CircularIndicatorTabLayout} you are
      * required to set any {@link ViewPager.OnPageChangeListener} through this method. This is so
      * that the layout can update it's scroll position correctly.
      *
@@ -283,19 +387,34 @@ public class SlidingTabLayout extends HorizontalScrollView {
         return textView;
     }
 
+//    private void se
+
     private void populateTabStrip() {
         final PagerAdapter adapter = mViewPager.getAdapter();
         final View.OnClickListener tabClickListener = new TabClickListener();
+        Log.d("DEBUG", "restore: " + mCurrentPosition);
 
         for (int i = 0; i < adapter.getCount(); i++) {
             View tabView = null;
             TextView tabTitleView = null;
+            ImageView tabIconView = null;
 
             if (mTabViewLayoutId != 0) {
                 // If there is a custom tab view layout id set, try and inflate it
                 tabView = LayoutInflater.from(getContext()).inflate(mTabViewLayoutId, mTabStrip,
                         false);
                 tabTitleView = (TextView) tabView.findViewById(mTabViewTextViewId);
+
+                tabIconView = (ImageView) tabView.findViewById(mTabViewIconId);
+
+                if (mIconManager != null && tabIconView != null) {
+                    tabIconView.setImageDrawable(ContextCompat.getDrawable(getContext(),
+                            mIconManager.getIcon(i)));
+                }
+//                if (mIconManager != null && mTabViewIconId != 0 && tabIconView != null) {
+//                    tabIconView.setImageDrawable(ContextCompat.getDrawable(getContext(),
+//                            mIconManager.getIcon(i)));
+//                }
             }
 
             if (tabView == null) {
@@ -306,11 +425,29 @@ public class SlidingTabLayout extends HorizontalScrollView {
                 tabTitleView = (TextView) tabView;
             }
 
+
             tabTitleView.setText(adapter.getPageTitle(i));
-            Log.d("##debug", "populateTabStrip: " + adapter.getPageTitle(i));
+//            Log.d("##debug", "populateTabStrip: " + adapter.getPageTitle(i));
             tabView.setOnClickListener(tabClickListener);
 
-            mTabStrip.addView(tabView);//// TODO: 5/12/17 .... hove to do more work
+//            mTabStrip.addView(tabView);//// TODO: 5/12/17 .... hove to do more work
+            tabView.setClickable(true);
+            Utils.applyRippleEffect(getContext(), tabView);
+
+            if (i == mCurrentPosition) {
+                tabView.setSelected(true);
+                tabTitleView.setTextColor(mSelectedTabTextColor);
+                if (tabIconView != null) {
+                    tabIconView.setImageDrawable(Utils.setupDrawableWithColor(tabIconView.getDrawable(),
+                            mSelectedIconColor));
+                }
+            } else {
+                tabTitleView.setTextColor(mTabTextColor);
+                if (tabIconView != null) {
+                    tabIconView.setImageDrawable(Utils.setupDrawableWithColor(tabIconView.getDrawable(), mIconColor));
+                }
+            }
+            mTabStrip.addView(tabView, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         }
 
         applyModeAndGravity();
@@ -326,10 +463,11 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
         switch (mMode) {
             case MODE_FIXED:
-                mTabStrip.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
+                mTabStrip.setGravity(mPosition == POSITION_TOP ? Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL :
+                        Gravity.CENTER);
                 break;
             case MODE_SCROLLABLE:
-                mTabStrip.setGravity(GravityCompat.START);
+                mTabStrip.setGravity(GravityCompat.START | Gravity.CENTER_VERTICAL);
                 break;
         }
 
@@ -375,6 +513,14 @@ public class SlidingTabLayout extends HorizontalScrollView {
         }
     }
 
+
+    public void setIcons(@DrawableRes int... icons) {
+        if (mIconManager == null) mIconManager = new SimpleIconManager();
+        mIconManager.setIcon(icons);
+        mTabStrip.removeAllViews();
+        populateTabStrip();
+    }
+
     private void scrollToTab(int tabIndex, int positionOffset) {
         final int tabStripChildCount = mTabStrip.getChildCount();
         if (tabStripChildCount == 0 || tabIndex < 0 || tabIndex >= tabStripChildCount) {
@@ -396,6 +542,9 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
     private class InternalViewPagerListener implements ViewPager.OnPageChangeListener {
         private int mScrollState;
+        private int mPreviousScrollState;
+
+        private float tempOffset;
 
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -404,7 +553,17 @@ public class SlidingTabLayout extends HorizontalScrollView {
                 return;
             }
 
-            mTabStrip.onViewPagerPageChanged(position, positionOffset);
+            if (tempOffset > positionOffset) {
+                Log.d("MOVE", "onPageScrolled: swipe to left");
+            } else {
+                Log.d("MOVE", "onPageScrolled: swipe to right");
+            }
+            tempOffset = positionOffset;
+
+            final boolean updateText = mScrollState != SCROLL_STATE_SETTLING ||
+                    mPreviousScrollState == SCROLL_STATE_DRAGGING;
+
+            mTabStrip.onViewPagerPageChanged(position, positionOffset, false);
 
             View selectedTitle = mTabStrip.getChildAt(position);
             int extraOffset = (selectedTitle != null)
@@ -420,6 +579,7 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
         @Override
         public void onPageScrollStateChanged(int state) {
+            mPreviousScrollState = mScrollState;
             mScrollState = state;
 
             if (mViewPagerPageChangeListener != null) {
@@ -429,14 +589,18 @@ public class SlidingTabLayout extends HorizontalScrollView {
 
         @Override
         public void onPageSelected(int position) {
-            if (mScrollState == ViewPager.SCROLL_STATE_IDLE) {
-                mTabStrip.onViewPagerPageChanged(position, 0f);
+            tempOffset = 0;
+            mCurrentPosition = position;
+            if (mScrollState == ViewPager.SCROLL_STATE_IDLE || mScrollState == SCROLL_STATE_SETTLING) {
+                mTabStrip.onViewPagerPageChanged(position, 0f, false);
                 scrollToTab(position, 0);
             }
 
             if (mViewPagerPageChangeListener != null) {
                 mViewPagerPageChangeListener.onPageSelected(position);
             }
+
+            invalidate();
         }
     }
 
@@ -446,9 +610,86 @@ public class SlidingTabLayout extends HorizontalScrollView {
             for (int i = 0; i < mTabStrip.getChildCount(); i++) {
                 if (v == mTabStrip.getChildAt(i)) {
                     mViewPager.setCurrentItem(i);
+                    mCurrentPosition = i;
+                    Log.d("DEBUG", "onClick: " + i);
                     return;
                 }
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Parcelable onSaveInstanceState() {
+        Parcelable saveInstanceState = super.onSaveInstanceState();
+        SavedState savedState = new SavedState(saveInstanceState);
+        savedState.childrenStates = new SparseArray();
+        for (int i = 0; i < getChildCount(); i++) {
+            getChildAt(i).saveHierarchyState(savedState.childrenStates);
+        }
+        savedState.currentPosition = mCurrentPosition;
+        return savedState;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        SavedState savedState = (SavedState) state;
+        super.onRestoreInstanceState(savedState.getSuperState());
+        mCurrentPosition = savedState.currentPosition;
+        for (int i = 0; i < getChildCount(); i++) {
+            getChildAt(i).restoreHierarchyState(savedState.childrenStates);
+        }
+        mTabStrip.removeAllViews();
+        populateTabStrip();
+    }
+
+    @Override
+    protected void dispatchSaveInstanceState(SparseArray<Parcelable> container) {
+        dispatchFreezeSelfOnly(container);
+    }
+
+    @Override
+    protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
+        dispatchThawSelfOnly(container);
+    }
+
+    private static class SavedState extends BaseSavedState {
+        private SparseArray childrenStates;
+        private int currentPosition;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in, ClassLoader classLoader) {
+            super(in);
+            childrenStates = in.readSparseArray(classLoader);
+            currentPosition = in.readInt();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeSparseArray(childrenStates);
+            out.writeInt(currentPosition);
+        }
+
+        public static final ClassLoaderCreator<SavedState> CREATOR = new ClassLoaderCreator<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel source, ClassLoader loader) {
+                return new SavedState(source, loader);
+            }
+
+            @Override
+            public SavedState createFromParcel(Parcel source) {
+                return createFromParcel(source);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 }

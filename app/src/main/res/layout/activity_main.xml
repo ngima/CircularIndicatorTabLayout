@@ -28,24 +28,30 @@
 
     </android.support.design.widget.AppBarLayout>
 
+
+    <np.com.ngimasherpa.citablayout.CircularIndicatorTabLayout
+        android:id="@+id/tab_monitoring_criteria"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/spacing_72"
+        app:iconColor="@color/colorPrimaryDark"
+        app:indicatorColor="@color/colorAccent"
+        app:indicatorPosition="bottom"
+        app:lineColor="@android:color/holo_red_dark"
+        app:lineEnabled="true"
+        app:mode="fixed"
+        app:selectedIconColor="@color/colorAccent"
+        app:tabViewIconId="@+id/iconTabViewLayout"
+        app:tabViewLayoutId="@layout/tab_layout"
+        app:tabViewTextViewColor="@color/colorPrimaryDark"
+        app:tabViewTextViewId="@+id/textTabViewLayout"
+        app:tabViewTextViewSelectedColor="@color/colorAccent"
+        app:tab_gravity="fill" />
+
     <android.support.v4.view.ViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-    <np.com.ngimasherpa.circularindicatortablayout.SlidingTabLayout
-        android:id="@+id/tab_monitoring_criteria"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/spacing_70"
-        android:layout_gravity="bottom"
-        app:indicatorColor="@color/colorAccent"
-        app:lineColor="@android:color/black"
-        app:lineEnabled="true"
-        app:mode="fixed"
-        app:position="bottom"
-        app:tabViewTextViewSelectedColor="@color/colorAccent"
-        app:tab_gravity="fill" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"

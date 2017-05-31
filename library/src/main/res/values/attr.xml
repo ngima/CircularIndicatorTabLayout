@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="SlidingTabLayout">
+    <declare-styleable name="CircularIndicatorTabLayout">
         <attr name="dividerColor" format="color|reference" />
         <attr name="indicatorColor" format="color|reference" />
         <attr name="lineColor" format="color|reference" />
         <attr name="tabViewTextViewColor" format="color|reference" />
         <attr name="tabViewTextViewSelectedColor" format="color|reference" />
+        <attr name="iconColor" format="color|reference" />
+        <attr name="selectedIconColor" format="color|reference" />
 
         <attr name="tabViewLayoutId" format="reference" />
         <attr name="tabViewTextViewId" format="reference" />
+        <attr name="tabViewIconId" format="reference" />
 
         <attr name="indicatorRadius" format="dimension" />
         <attr name="tabMinWidth" format="dimension" />
@@ -29,7 +32,7 @@
             <enum name="fill" value="0" />
         </attr>
         <attr name="lineEnabled" format="boolean" />
-        <attr name="position" format="enum">
+        <attr name="indicatorPosition" format="enum">
             <enum name="top" value="0" />
             <enum name="bottom" value="1" />
         </attr>

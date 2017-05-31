@@ -18,6 +18,9 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import np.com.ngimasherpa.citablayout.CircularIndicatorTabLayout;
+
+
 public class MainActivity extends AppCompatActivity {
 
     /**
@@ -34,7 +37,8 @@ public class MainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-    SlidingTabLayout circularIndicatorTabLayout;
+
+//    SlidingTabLayout circularIndicatorTabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        circularIndicatorTabLayout = new SlidingTabLayout(this);
+
+//        circularIndicatorTabLayout = new SlidingTabLayout(this);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -52,11 +57,14 @@ public class MainActivity extends AppCompatActivity {
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        SlidingTabLayout tabLayout = (SlidingTabLayout) findViewById(R.id.tab_monitoring_criteria);
-//        tabLayout.setCustomTabView(R.layout.tab_layout, R.id.textTabViewLayout);
+        CircularIndicatorTabLayout tabLayout = (CircularIndicatorTabLayout) findViewById(R.id.tab_monitoring_criteria);
         tabLayout.setupWithViewPager(mViewPager);
-        circularIndicatorTabLayout.setupWithViewPager(mViewPager);
 
+        tabLayout.setIcons(
+                R.drawable.ic_arrow_drop_down,
+                R.drawable.ic_audiotrack,
+                R.drawable.ic_beach,
+                R.drawable.ic_camera);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -66,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-
     }
 
 
