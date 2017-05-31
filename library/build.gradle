@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
 
 android {
     compileSdkVersion 25
@@ -20,6 +21,30 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+}
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'CircularIndicatorTabLayout'
+
+    publishedGroupId = 'com.inthecheesefactory.thecheeselibrary'
+    libraryName = 'FBLike'
+    artifact = 'fb-like'
+
+    libraryDescription = 'A wrapper for Facebook Native Like Button (LikeView) on Android'
+
+    siteUrl = 'https://github.com/nuuneoi/FBLikeAndroid'
+    gitUrl = 'https://github.com/nuuneoi/FBLikeAndroid.git'
+
+    libraryVersion = '0.9.3'
+
+    developerId = 'nuuneoi'
+    developerName = 'Sittiphol Phanvilai'
+    developerEmail = 'sittiphol@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
 }
 
 dependencies {
