@@ -7,7 +7,7 @@
 
 ## Example ##
 
-    `<np.com.ngimasherpa.citablayout.CircularIndicatorTabLayout  
+    <np.com.ngimasherpa.citablayout.CircularIndicatorTabLayout  
             android:id="@+id/tab_monitoring_criteria"  
             android:layout_width="match_parent"  
             android:layout_height="@dimen/spacing_72"  
@@ -23,4 +23,4 @@
             app:tabViewTextViewColor="@color/colorPrimaryDark"  
             app:tabViewTextViewId="@+id/textTabViewLayout"  
             app:tabViewTextViewSelectedColor="@color/colorAccent"  
-            app:tab_gravity="fill" />`
+            app:tab_gravity="fill" />
