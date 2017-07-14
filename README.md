@@ -20,7 +20,7 @@
 
 
 ## Example ##
-# In layout # 
+### In layout ### 
 
     <np.com.ngimasherpa.citablayout.CircularIndicatorTabLayout  
             android:id="@+id/tab_monitoring_criteria"  
@@ -40,7 +40,7 @@
             app:tabViewTextViewSelectedColor="@color/colorAccent"  
             app:tab_gravity="fill" />
   
-# In java # 
+### In java ### 
 
         SectionPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
