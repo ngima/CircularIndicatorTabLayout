@@ -1,9 +1,23 @@
 # CircularIndicatorTabLayout #
 
- [ ![Download](https://api.bintray.com/packages/ngima/CircularIndicatorTabLayout/CircularIndicatorTabLayout/images/download.svg) ](https://bintray.com/ngima/CircularIndicatorTabLayout/CircularIndicatorTabLayout/_latestVersion)
+ [ ![Download](https://api.bintray.com/packages/ngima/CircularIndicatorTabLayout/CircularIndicatorTabLayout/images/download.svg) ](https://bintray.com/ngima/CircularIndicatorTabLayout/download_file?file_path=circular-idicator-tab-layout-1.0.0.aar)
 
 ## Demo ##
 ![Demo](./images/demo1.gif)
+
+## Installation ##
+
+* Download CircularIndicatorTabLayout aar file from here: [ ![Download](https://api.bintray.com/packages/ngima/CircularIndicatorTabLayout/CircularIndicatorTabLayout/images/download.svg) ](https://bintray.com/ngima/CircularIndicatorTabLayout/download_file?file_path=circular-idicator-tab-layout-1.0.0.aar)
+* Move `circular-idicator-tab-layout-1.0.0.aar` to `app/libs`
+* In project build.gradle file add 
+  `repositories {  
+        flatDir {
+            dirs 'libs'
+        }
+    }`
+ * In app build.gradle file add
+  `compile(name: 'circular-idicator-tab-layout-1.0.0', ext: 'aar')`
+
 
 ## Example ##
 
@@ -24,3 +38,14 @@
             app:tabViewTextViewId="@+id/textTabViewLayout"  
             app:tabViewTextViewSelectedColor="@color/colorAccent"  
             app:tab_gravity="fill" />
+                    
+        SectionPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
+        CircularIndicatorTabLayout tabLayout = (CircularIndicatorTabLayout) findViewById(R.id.tab_monitoring_criteria);
+        
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        tabLayout.setupWithViewPager(mViewPager);
+        tabLayout.setIcons(
+                R.drawable.ic_arrow_drop_down,
+                R.drawable.ic_audiotrack,
+                R.drawable.ic_beach);
